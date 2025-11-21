@@ -31,22 +31,22 @@ public class StatementPrinter {
 
         for (Performance performance : invoice.getPerformances()) {
 
-            int rslt = 0;
-            rslt = getAmount(performance);
+            int rslt = getAmount(performance);
 
-            // add volume credits
-            volumeCredits += Math.max(performance.getAudience() - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
-            // add extra credit for every five comedy attendees
-            if ("comedy".equals(getPlay(performance).getType())) {
-                volumeCredits += performance.getAudience() / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
-            }
+            // add volume credits (now using the helper)
+            volumeCredits += getVolumeCredits(performance);
 
             // print line for this order
-            result.append(String.format("  %s: %s (%s seats)%n", getPlay(performance).getName(),
-                    frmt.format(rslt / Constants.PERCENT_FACTOR), performance.getAudience()));
+            result.append(String.format(
+                    "  %s: %s (%s seats)%n",
+                    getPlay(performance).getName(),
+                    frmt.format(rslt / Constants.PERCENT_FACTOR),
+                    performance.getAudience()));
             totalAmount += rslt;
         }
-        result.append(String.format("Amount owed is %s%n", frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
+
+        result.append(String.format("Amount owed is %s%n",
+                frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
         result.append(String.format("You earned %s credits%n", volumeCredits));
         return result.toString();
     }
@@ -75,8 +75,24 @@ public class StatementPrinter {
                 rslt += Constants.COMEDY_AMOUNT_PER_AUDIENCE * performance.getAudience();
                 break;
             default:
-                throw new RuntimeException(String.format("unknown type: %s", getPlay(performance).getType()));
+                throw new RuntimeException(String.format(
+                        "unknown type: %s", getPlay(performance).getType()));
         }
         return rslt;
+    }
+
+    // ⭐ new helper method for Task 2.2
+    private int getVolumeCredits(Performance performance) {
+        int result = 0;
+
+        result += Math.max(performance.getAudience()
+                - Constants.BASE_VOLUME_CREDIT_THRESHOLD, 0);
+
+        if ("comedy".equals(getPlay(performance).getType())) {
+            result += performance.getAudience()
+                    / Constants.COMEDY_EXTRA_VOLUME_FACTOR;
+        }
+
+        return result;
     }
 }
