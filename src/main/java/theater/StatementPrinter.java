@@ -27,8 +27,6 @@ public class StatementPrinter {
         final StringBuilder result = new StringBuilder("Statement for "
                 + invoice.getCustomer() + System.lineSeparator());
 
-        final NumberFormat frmt = NumberFormat.getCurrencyInstance(Locale.US);
-
         for (Performance performance : invoice.getPerformances()) {
 
             int rslt = getAmount(performance);
@@ -40,13 +38,13 @@ public class StatementPrinter {
             result.append(String.format(
                     "  %s: %s (%s seats)%n",
                     getPlay(performance).getName(),
-                    frmt.format(rslt / Constants.PERCENT_FACTOR),
+                    usd(rslt),
                     performance.getAudience()));
             totalAmount += rslt;
         }
 
         result.append(String.format("Amount owed is %s%n",
-                frmt.format(totalAmount / Constants.PERCENT_FACTOR)));
+                usd(totalAmount)));
         result.append(String.format("You earned %s credits%n", volumeCredits));
         return result.toString();
     }
@@ -81,7 +79,6 @@ public class StatementPrinter {
         return rslt;
     }
 
-    // ⭐ new helper method for Task 2.2
     private int getVolumeCredits(Performance performance) {
         int result = 0;
 
@@ -94,5 +91,11 @@ public class StatementPrinter {
         }
 
         return result;
+    }
+
+    // ⭐ new helper for Task 2.3
+    private String usd(int amountInCents) {
+        return NumberFormat.getCurrencyInstance(Locale.US)
+                .format(amountInCents / Constants.PERCENT_FACTOR);
     }
 }
